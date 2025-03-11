@@ -38,4 +38,18 @@ train_datagen = keras.Sequential([
 train_ds = train_ds.map(lambda x, y: (train_datagen(x, training=True), y))
 val_ds = val_ds.map(lambda x, y: (x / 255.0, y))
 
-print(train_ds.class_names)
+def create_base_cnn(input_shape, num_classes):
+    base_cnn = keras.models.Sequential([
+        keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+        keras.layers.MaxPooling2D((2, 2)),
+        keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        keras.layers.MaxPooling2D((2, 2)),
+        keras.layers.Conv2D(128, (3, 3), activation='relu'),
+        keras.layers.MaxPooling2D((2, 2)),
+        keras.layers.Flatten(),
+        keras.layers.Dense(512, activation='relu'),
+        keras.layers.Dropout(0.5),
+        keras.layers.Dense(num_classes, activation='softmax')
+    ])
+    return base_cnn
+
