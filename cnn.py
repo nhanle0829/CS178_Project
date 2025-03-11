@@ -1,46 +1,34 @@
 import keras
+import numpy as np
 from keras.src.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.src.optimizers import Adam
-
-img_height, img_width = 48, 48
-batch_size = 32
+import scipy.io as sio
+from keras.src.utils import to_categorical
 
 # Load data
-train_ds = keras.utils.image_dataset_from_directory(
-    "./emotion_dataset",
-    validation_split=0.2,
-    label_mode="categorical",
-    color_mode="grayscale",
-    subset="training",
-    seed=123,
-    image_size=(img_height, img_width),
-    batch_size=batch_size
-)
+data_tr = sio.loadmat("train_32x32.mat")
+X_tr = data_tr['X']  # Shape would be (32, 32, 3, num_samples)
+y_tr = data_tr['y']  # Class labels
 
-val_ds = keras.utils.image_dataset_from_directory(
-    "./emotion_dataset",
-    validation_split=0.2,
-    label_mode="categorical",
-    color_mode="grayscale",
-    subset="validation",
-    seed=123,
-    image_size=(img_height, img_width),
-    batch_size=batch_size
-)
+data_val = sio.loadmat("test_32x32.mat")
+X_val = data_val['X']
+y_val = data_val['y']
 
 # Preprocessing
-train_datagen = keras.Sequential([
-    keras.layers.Rescaling(1./255),
-    keras.layers.RandomFlip("horizontal"),
-    keras.layers.RandomZoom(0.2),
-    keras.layers.RandomRotation(0.2),
-    keras.layers.RandomContrast(0.2)
-])
+X_tr = X_tr.transpose(3, 0, 1, 2)
+X_val = X_val.transpose(3, 0, 1, 2)
 
-train_ds = train_ds.map(lambda x, y: (train_datagen(x, training=True), y))
-val_ds = val_ds.map(lambda x, y: (x / 255.0, y))
+X_tr = X_tr.astype('float32') / 255.0
+X_val = X_val.astype('float32') / 255.0
 
-def create_base_cnn(input_shape, num_classes):
+if np.min(y_tr) == 1:
+    y_tr = y_tr - 1
+    y_val = y_val - 1
+
+y_tr = to_categorical(y_tr, num_classes=10)
+y_val = to_categorical(y_val, num_classes=10)
+
+def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
     base_cnn = keras.models.Sequential([
         keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
         keras.layers.MaxPooling2D((2, 2)),
@@ -55,7 +43,7 @@ def create_base_cnn(input_shape, num_classes):
     ])
     return base_cnn
 
-model = create_base_cnn((48, 48, 1), 7)
+model = create_base_cnn()
 model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
 
 # Early Stop condition + Reduce Learning Rate
@@ -76,12 +64,12 @@ callback = [
 
 # Train model
 model.fit(
-    train_ds,
-    validation_data=val_ds,
+    X_tr, y_tr,
+    validation_data=(X_val, y_val),
     epochs=50,
     callbacks=callback
 )
 
 # Evaluate model
-test_loss, test_acc = model.evaluate(val_ds)
+test_loss, test_acc = model.evaluate(X_val, y_val)
 print(f"Base_CNN - Test accuracy: {test_acc:.4f}")
