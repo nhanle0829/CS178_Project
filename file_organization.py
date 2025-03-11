@@ -20,3 +20,5 @@ for emotion in df["emotion"].unique():
 # Copy image
 for idx in range(len(df)):
     shutil.copy(data_path + '/' + df["image"][idx], dest_path + '/' + df["emotion"][idx] + '/' + df["image"][idx])
+    if Path(df["image"][idx]).suffix.upper() not in [".JPG", ".JPEG", ".PNG"]:
+        print(df["image"][idx])

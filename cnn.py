@@ -1,11 +1,13 @@
 import keras
+from keras.src.callbacks import EarlyStopping, ReduceLROnPlateau
+from keras.src.optimizers import Adam
 
 img_height, img_width = 48, 48
 batch_size = 32
 
 # Load data
 train_ds = keras.utils.image_dataset_from_directory(
-    "emotion_dataset",
+    "./emotion_dataset",
     validation_split=0.2,
     label_mode="categorical",
     color_mode="grayscale",
@@ -16,7 +18,7 @@ train_ds = keras.utils.image_dataset_from_directory(
 )
 
 val_ds = keras.utils.image_dataset_from_directory(
-    "emotion_dataset",
+    "./emotion_dataset",
     validation_split=0.2,
     label_mode="categorical",
     color_mode="grayscale",
@@ -53,3 +55,33 @@ def create_base_cnn(input_shape, num_classes):
     ])
     return base_cnn
 
+model = create_base_cnn((48, 48, 1), 7)
+model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
+
+# Early Stop condition + Reduce Learning Rate
+callback = [
+    EarlyStopping(
+        monitor='val_loss',
+        patience=10,
+        restore_best_weights=True,
+        verbose=1
+    ),
+    ReduceLROnPlateau(
+        monitor='val_loss',
+        factor=0.5,
+        patience=5,
+        min_lr=1e-6
+    )
+]
+
+# Train model
+model.fit(
+    train_ds,
+    validation_data=val_ds,
+    epochs=50,
+    callbacks=callback
+)
+
+# Evaluate model
+test_loss, test_acc = model.evaluate(val_ds)
+print(f"Base_CNN - Test accuracy: {test_acc:.4f}")
