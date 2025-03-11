@@ -2,7 +2,8 @@
 # Edit at https://www.toptal.com/developers/gitignore?templates=pycharm+all,python,macos
 
 legend.csv
-images
+images/**
+emotion_dataset/**
 
 ### macOS ###
 # General
