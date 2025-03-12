@@ -41,6 +41,29 @@ def plot_class_distribution():
     plt.xticks(unique)
     plt.show()
 
+# Plot image RGB channel
+def image_rgb_channel():
+    red = X[:, :, 0, 0]
+    blue = X[:, :, 1, 0]
+    green = X[:, :, 2, 0]
+
+    fig, axes = plt.subplots(1, 3, figsize=(12, 5))
+    axes[0].imshow(red, cmap="Reds")
+    axes[0].set_xticks([])
+    axes[0].set_yticks([])
+
+    axes[1].imshow(blue, cmap="Blues")
+    axes[1].set_xticks([])
+    axes[1].set_yticks([])
+
+    axes[2].imshow(green, cmap="Greens")
+    axes[2].set_xticks([])
+    axes[2].set_yticks([])
+
+    plt.suptitle("Image and its individual RGB channels")
+    plt.tight_layout()
+    plt.show()
+
 # Plot pixel distribution
 def plot_pixel_distribution(sample_size=1000):
     X_reshaped = X.transpose(3, 0, 1, 2)
@@ -59,11 +82,17 @@ def plot_pixel_distribution(sample_size=1000):
     axes[1].hist(pixel_list[1], bins=50, color="g")
     axes[2].hist(pixel_list[2], bins=50, color="b")
 
+    plt.suptitle("Pixel Distribution")
     plt.tight_layout()
     plt.show()
 
+def image_after_normalization():
+
 
 if __name__ == "__main__":
+    print(f"Single image shape: {X[:, :, :, 0].shape}")
+    
     plat_samples_for_each_digit()
     plot_class_distribution()
+    image_rgb_channel()
     plot_pixel_distribution()
