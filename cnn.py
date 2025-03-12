@@ -6,19 +6,6 @@ from keras.src.optimizers import Adam
 import scipy.io as sio
 from keras.src.utils import to_categorical
 
-# Preprocessing
-X_tr = X_tr.transpose(3, 0, 1, 2)
-X_val = X_val.transpose(3, 0, 1, 2)
-
-X_tr = X_tr.astype('float32') / 255.0
-X_val = X_val.astype('float32') / 255.0
-
-if np.min(y_tr) == 1:
-    y_tr = y_tr - 1
-    y_val = y_val - 1
-
-y_tr = to_categorical(y_tr, num_classes=10)
-y_val = to_categorical(y_val, num_classes=10)
 
 def main():
     pass
@@ -34,8 +21,22 @@ def preprocessing_data():
     y_val = data_val['y']
 
     # Preprocessing
+    # RGB Images
     X_tr_rgb = X_tr.transpose(3, 0, 1, 2)
     X_val_rgb = X_val.transpose(3, 0, 1, 2)
+
+    # GrayScale Image
+    X_tr_gray = convert_to_grayscale(X_tr_rgb)
+    X_val_gray = convert_to_grayscale(X_val_rgb)
+
+    y_tr[y_tr == 10] = 0
+    y_val[y_val == 10] = 0
+
+    # One Hot Encoding
+    y_tr = to_categorical(y_tr, num_classes=10)
+    y_val = to_categorical(y_val, num_classes=10)
+
+    return X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val
 
 def convert_to_grayscale(images):
     # Convert to float for better precision
