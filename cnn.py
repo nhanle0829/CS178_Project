@@ -11,6 +11,10 @@ def main():
     X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val = preprocessing_data()
 
 
+def train_and_evaluate_model(model_type, X_tr, y_tr, X_val, y_val):
+    model = train_model(model_type, X_tr, y_tr, X_val, y_val)
+    evaluate_model(model, X_val, y_val)
+
 def preprocessing_data():
     # Load data
     data_tr = sio.loadmat("train_32x32.mat")
@@ -64,7 +68,7 @@ def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
     return base_cnn
 
 def train_model(model_factory, X_tr, y_tr, X_val, y_val):
-    model = model_factory()
+    model = model_factory(input_shape=X_tr[0].shape)
     model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
 
     # Early Stop condition + Reduce Learning Rate
