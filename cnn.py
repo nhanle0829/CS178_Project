@@ -5,15 +5,6 @@ from keras.src.optimizers import Adam
 import scipy.io as sio
 from keras.src.utils import to_categorical
 
-# Load data
-data_tr = sio.loadmat("train_32x32.mat")
-X_tr = data_tr['X']  # Shape would be (32, 32, 3, num_samples)
-y_tr = data_tr['y']  # Class labels
-
-data_val = sio.loadmat("test_32x32.mat")
-X_val = data_val['X']
-y_val = data_val['y']
-
 # Preprocessing
 X_tr = X_tr.transpose(3, 0, 1, 2)
 X_val = X_val.transpose(3, 0, 1, 2)
@@ -27,6 +18,25 @@ if np.min(y_tr) == 1:
 
 y_tr = to_categorical(y_tr, num_classes=10)
 y_val = to_categorical(y_val, num_classes=10)
+
+def main():
+    pass
+
+def preprocessing_data():
+    # Load data
+    data_tr = sio.loadmat("train_32x32.mat")
+    X_tr = data_tr['X']  # Shape would be (32, 32, 3, num_samples)
+    y_tr = data_tr['y']  # Class labels
+
+    data_val = sio.loadmat("test_32x32.mat")
+    X_val = data_val['X']
+    y_val = data_val['y']
+
+    # Preprocessing
+    X_tr_rgb = X_tr.transpose(3, 0, 1, 2)
+    X_val_rgb = X_val.transpose(3, 0, 1, 2)
+
+
 
 def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
     base_cnn = keras.models.Sequential([
