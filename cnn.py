@@ -43,33 +43,28 @@ def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
     ])
     return base_cnn
 
+def train_model(model_factory, X_tr, y_tr, X_val, y_val):
+    model = model_factory()
+    model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
+
+    # Early Stop condition + Reduce Learning Rate
+    callback = [
+        EarlyStopping(
+            monitor='val_loss',
+            patience=10,
+            restore_best_weights=True,
+            verbose=1
+        ),
+        ReduceLROnPlateau(
+            monitor='val_loss',
+            factor=0.5,
+            patience=5,
+            min_lr=1e-6
+        )
+    ]
+
+    model.fit(X_tr, y_tr, validation_data=(X_val, y_val), epochs=50, callbacks=callback)
+
 def evaluate_model(model):
     test_loss, test_acc = model.evaluate(X_val, y_val)
     print(f"Base_CNN - Test accuracy: {test_acc:.4f}")
-
-model = create_base_cnn()
-model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
-
-# Early Stop condition + Reduce Learning Rate
-callback = [
-    EarlyStopping(
-        monitor='val_loss',
-        patience=10,
-        restore_best_weights=True,
-        verbose=1
-    ),
-    ReduceLROnPlateau(
-        monitor='val_loss',
-        factor=0.5,
-        patience=5,
-        min_lr=1e-6
-    )
-]
-
-# Train model
-model.fit(
-    X_tr, y_tr,
-    validation_data=(X_val, y_val),
-    epochs=50,
-    callbacks=callback
-)
