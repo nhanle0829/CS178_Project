@@ -87,7 +87,22 @@ def plot_pixel_distribution(sample_size=1000):
     plt.show()
 
 def image_after_normalization():
+    original_img = X[:, :, :, 0]
+    normalized_img = X[:, :, :, 0].astype("float32") / 255.0
+    fig, axes = plt.subplots(1, 2, figsize=(10, 6))
 
+    axes[0].imshow(original_img)
+    axes[0].set_title("Original Image")
+
+    axes[1].imshow(normalized_img)
+    axes[1].set_title("Normalized Image")
+
+    plt.suptitle("An Image Before and After Normalization")
+    plt.tight_layout()
+    plt.show()
+
+    print(f"Original image - Min: {original_img.min()}, Max: {original_img.max()}")
+    print(f"Normalized image - Min: {normalized_img.min()}, Max: {normalized_img.max()}")
 
 if __name__ == "__main__":
     print(f"Single image shape: {X[:, :, :, 0].shape}")
@@ -96,3 +111,4 @@ if __name__ == "__main__":
     plot_class_distribution()
     image_rgb_channel()
     plot_pixel_distribution()
+    image_after_normalization()
