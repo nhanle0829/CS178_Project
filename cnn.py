@@ -1,5 +1,6 @@
 import keras
 import numpy as np
+import tensorflow as tf
 from keras.src.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.src.optimizers import Adam
 import scipy.io as sio
@@ -36,7 +37,14 @@ def preprocessing_data():
     X_tr_rgb = X_tr.transpose(3, 0, 1, 2)
     X_val_rgb = X_val.transpose(3, 0, 1, 2)
 
+def convert_to_grayscale(images):
+    # Convert to float for better precision
+    images_float = tf.cast(images, tf.float32)
 
+    # Apply TensorFlow's rgb_to_grayscale function
+    grayscale_images = tf.image.rgb_to_grayscale(images_float)
+
+    return grayscale_images
 
 def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
     base_cnn = keras.models.Sequential([
