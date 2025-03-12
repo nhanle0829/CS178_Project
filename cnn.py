@@ -9,11 +9,13 @@ from keras.src.utils import to_categorical
 
 def main():
     X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val = preprocessing_data()
+    # Base CNN
+    train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
+    train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
 
-
-def train_and_evaluate_model(model_type, X_tr, y_tr, X_val, y_val):
+def train_and_evaluate_model(model_type, X_tr, y_tr, X_val, y_val, model_name):
     model = train_model(model_type, X_tr, y_tr, X_val, y_val)
-    evaluate_model(model, X_val, y_val)
+    evaluate_model(model, X_val, y_val, model_name)
 
 def preprocessing_data():
     # Load data
@@ -90,9 +92,9 @@ def train_model(model_factory, X_tr, y_tr, X_val, y_val):
     model.fit(X_tr, y_tr, validation_data=(X_val, y_val), epochs=50, callbacks=callback)
     return model
 
-def evaluate_model(model, X_val, y_val):
+def evaluate_model(model, X_val, y_val, model_name):
     test_loss, test_acc = model.evaluate(X_val, y_val)
-    print(f"Base_CNN - Test accuracy: {test_acc:.4f}")
+    print(f"{model_name} - Test accuracy: {test_acc:.4f}")
 
 if __name__ == "__main__":
     main()
