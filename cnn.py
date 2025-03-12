@@ -8,7 +8,8 @@ from keras.src.utils import to_categorical
 
 
 def main():
-    pass
+    X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val = preprocessing_data()
+
 
 def preprocessing_data():
     # Load data
@@ -83,7 +84,11 @@ def train_model(model_factory, X_tr, y_tr, X_val, y_val):
     ]
 
     model.fit(X_tr, y_tr, validation_data=(X_val, y_val), epochs=50, callbacks=callback)
+    return model
 
-def evaluate_model(model):
+def evaluate_model(model, X_val, y_val):
     test_loss, test_acc = model.evaluate(X_val, y_val)
     print(f"Base_CNN - Test accuracy: {test_acc:.4f}")
+
+if __name__ == "__main__":
+    main()
