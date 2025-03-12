@@ -14,3 +14,19 @@ def random_indexes_number(number, number_of_index=5):
         indices = np.random.choice(indices, size=5, replace=False)
     return indices
 
+# Samples for each digit
+fig, axes = plt.subplots(10, 5, figsize=(20, 10))
+
+for i in range(10):
+    random_indices = random_indexes_number(i)
+    for j in range(5):
+        img = X[:, :, :, random_indices[j]]
+        axes[i][j].imshow(img)
+
+        axes[i][j].set_xticks([])
+        axes[i][j].set_yticks([])
+
+plt.suptitle("SVHN Dataset Samples for Each Digit", fontsize=30)
+plt.tight_layout()
+plt.show()
+
