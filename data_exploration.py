@@ -30,3 +30,11 @@ plt.suptitle("SVHN Dataset Samples for Each Digit", fontsize=30)
 plt.tight_layout()
 plt.show()
 
+# Plot class distribution
+unique, count = np.unique(y, return_counts=True)
+plt.bar(unique, count)
+plt.xlabel("Digit")
+plt.ylabel("Count")
+plt.title("Class Distribution in SVHN Dataset")
+plt.xticks(unique)
+plt.show()
