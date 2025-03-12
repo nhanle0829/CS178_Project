@@ -43,6 +43,10 @@ def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
     ])
     return base_cnn
 
+def evaluate_model(model):
+    test_loss, test_acc = model.evaluate(X_val, y_val)
+    print(f"Base_CNN - Test accuracy: {test_acc:.4f}")
+
 model = create_base_cnn()
 model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
 
@@ -69,7 +73,3 @@ model.fit(
     epochs=50,
     callbacks=callback
 )
-
-# Evaluate model
-test_loss, test_acc = model.evaluate(X_val, y_val)
-print(f"Base_CNN - Test accuracy: {test_acc:.4f}")
