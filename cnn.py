@@ -54,21 +54,6 @@ def convert_to_grayscale(images):
 
     return grayscale_images
 
-def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
-    base_cnn = keras.models.Sequential([
-        keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
-        keras.layers.MaxPooling2D((2, 2)),
-        keras.layers.Conv2D(64, (3, 3), activation='relu'),
-        keras.layers.MaxPooling2D((2, 2)),
-        keras.layers.Conv2D(128, (3, 3), activation='relu'),
-        keras.layers.MaxPooling2D((2, 2)),
-        keras.layers.Flatten(),
-        keras.layers.Dense(512, activation='relu'),
-        keras.layers.Dropout(0.5),
-        keras.layers.Dense(num_classes, activation='softmax')
-    ])
-    return base_cnn
-
 def train_model(model_factory, X_tr, y_tr, X_val, y_val):
     model = model_factory(input_shape=X_tr[0].shape)
     model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
@@ -96,5 +81,37 @@ def evaluate_model(model, X_val, y_val, model_name):
     test_loss, test_acc = model.evaluate(X_val, y_val)
     print(f"{model_name} - Test accuracy: {test_acc:.4f}")
 
+def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
+    base_cnn = keras.models.Sequential([
+        # First Convolutional Layer
+        keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+        keras.layers.MaxPooling2D((2, 2)),
+        # Second Convolutional Layer
+        keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        keras.layers.MaxPooling2D((2, 2)),
+
+        keras.layers.Flatten(),
+        # Neural Network
+        keras.layers.Dense(128, activation='relu'),
+        # Drop out to reduce overfitting
+        keras.layers.Dropout(0.5),
+        keras.layers.Dense(num_classes, activation='softmax')
+    ])
+    return base_cnn
+
+
 if __name__ == "__main__":
     main()
+
+
+# keras.models.Sequential([
+#         keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+#         keras.layers.MaxPooling2D((2, 2)),
+#         keras.layers.Conv2D(64, (3, 3), activation='relu'),
+#         keras.layers.MaxPooling2D((2, 2)),
+#         keras.layers.Conv2D(128, (3, 3), activation='relu'),
+#         keras.layers.MaxPooling2D((2, 2)),
+#         keras.layers.Flatten(),
+#         keras.layers.Dense(512, activation='relu'),
+#         keras.layers.Dropout(0.5),
+#         keras.layers.Dense(num_classes, activation='softmax')
