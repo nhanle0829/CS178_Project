@@ -78,12 +78,12 @@ def evaluate_model(model, X_val, y_val, model_name):
     print(f"{model_name} - Test accuracy: {test_acc:.4f}")
 
 def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
-    base_cnn = keras.models.Sequential([
+    model = keras.models.Sequential([
         # First Convolutional Layer
-        keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
+        keras.layers.Conv2D(32, 3, activation='relu', input_shape=input_shape),
         keras.layers.MaxPooling2D((2, 2)),
         # Second Convolutional Layer
-        keras.layers.Conv2D(64, (3, 3), activation='relu'),
+        keras.layers.Conv2D(64, 3, activation='relu'),
         keras.layers.MaxPooling2D((2, 2)),
 
         keras.layers.Flatten(),
@@ -93,7 +93,58 @@ def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
         keras.layers.Dropout(0.5),
         keras.layers.Dense(num_classes, activation='softmax')
     ])
-    return base_cnn
+    return model
+
+def create_deep_cnn(input_shape=(32, 32, 3), num_classes=10):
+    model = keras.models.Sequential()
+
+    # First Convolutional Block
+    model.add(keras.layers.Conv2D(32, 3, input_shape=input_shape))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("relu"))
+    model.add(keras.layers.Conv2D(32, 3))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("relu"))
+    model.add(keras.layers.MaxPooling2D((2, 2)))
+    model.add(keras.layers.Dropout(0.1))
+
+    # Second Convolutional Block
+    model.add(keras.layers.Conv2D(64, 3))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("relu"))
+    model.add(keras.layers.Conv2D(64, 3))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("relu"))
+    model.add(keras.layers.MaxPooling2D((2, 2)))
+    model.add(keras.layers.Dropout(0.2))
+
+    # Third Convolutional Block
+    model.add(keras.layers.Conv2D(128, 3))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("relu"))
+    model.add(keras.layers.Conv2D(128, 3))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("relu"))
+    model.add(keras.layers.MaxPooling2D((2, 2)))
+    model.add(keras.layers.Dropout(0.3))
+
+    model.add(keras.layers.Flatten())
+
+    # First dense block
+    model.add(keras.layers.Dense(512))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("relu"))
+    model.add(keras.layers.Dropout(0.5))
+
+    # Second dense block
+    model.add(keras.layers.Dense(256))
+    model.add(keras.layers.BatchNormalization())
+    model.add(keras.layers.Activation("relu"))
+    model.add(keras.layers.Dropout(0.5))
+
+    # Output layer
+    model.add(keras.layers.Dense(num_classes, activation="softmax"))
+    return model
 
 
 if __name__ == "__main__":
