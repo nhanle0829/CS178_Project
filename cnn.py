@@ -4,7 +4,7 @@ import tensorflow as tf
 from keras.src.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.src.optimizers import Adam
 import scipy.io as sio
-from keras.src.utils import to_categorical
+import keras_tuner as kt
 
 
 def main():
@@ -12,7 +12,7 @@ def main():
     # Base CNN
     # train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
     # train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
-    train_and_evaluate_model(create_deep_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Deep CNN")
+    # train_and_evaluate_model(create_deep_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Deep CNN")
 
 def train_and_evaluate_model(model_type, X_tr, y_tr, X_val, y_val, model_name):
     model = train_model(model_type, X_tr, y_tr, X_val, y_val)
@@ -146,6 +146,11 @@ def create_deep_cnn(input_shape=(32, 32, 3), num_classes=10):
     # Output layer
     model.add(keras.layers.Dense(num_classes, activation="softmax"))
     return model
+
+def build_model(hp):
+    model = keras.models.Sequential()
+    # Input Layer
+    model.add(keras.layers.Input(shape=(32, 32, 3)))
 
 
 if __name__ == "__main__":
