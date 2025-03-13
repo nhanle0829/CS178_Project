@@ -13,6 +13,7 @@ def main():
     # train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
     # train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
     # train_and_evaluate_model(create_deep_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Deep CNN")
+    tune_model(X_tr_rgb[:50_000], y_tr[:50_000], X_val_rgb, y_val)
 
 def train_and_evaluate_model(model_type, X_tr, y_tr, X_val, y_val, model_name):
     model = train_model(model_type, X_tr, y_tr, X_val, y_val)
@@ -221,7 +222,21 @@ def tune_model(X_tr, y_tr, X_val, y_val):
         directory="tuning",
         project_name="CS_178"
     )
-    tuner.search(X_tr, y_tr, epochs=30, validation_data=(X_val, y_val))
+
+    callbacks = [
+        EarlyStopping(
+            monitor="val_loss",
+            patience=5,
+            restore_best_weights=True,
+        ),
+        ReduceLROnPlateau(
+            monitor="val_loss",
+            factor=0.5,
+            patience=3,
+        )
+    ]
+
+    tuner.search(X_tr, y_tr, epochs=30, validation_data=(X_val, y_val), callbacks=callbacks)
 
     best_model = tuner.get_best_models(num_models=1)[0]
     best_model.summary()
