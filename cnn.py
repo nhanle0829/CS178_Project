@@ -39,10 +39,6 @@ def preprocessing_data():
     y_tr[y_tr == 10] = 0
     y_val[y_val == 10] = 0
 
-    # One Hot Encoding
-    y_tr = to_categorical(y_tr, num_classes=10)
-    y_val = to_categorical(y_val, num_classes=10)
-
     return X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val
 
 def convert_to_grayscale(images):
@@ -56,7 +52,7 @@ def convert_to_grayscale(images):
 
 def train_model(model_factory, X_tr, y_tr, X_val, y_val):
     model = model_factory(input_shape=X_tr[0].shape)
-    model.compile(loss='categorical_crossentropy', optimizer=Adam(), metrics=['accuracy'])
+    model.compile(loss="sparse_categorical_crossentropy", optimizer=Adam(), metrics=['accuracy'])
 
     # Early Stop condition + Reduce Learning Rate
     callback = [
