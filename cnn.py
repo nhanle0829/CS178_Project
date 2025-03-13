@@ -10,10 +10,10 @@ import keras_tuner as kt
 def main():
     X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val = preprocessing_data()
     # Base CNN
-    # train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
-    # train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
+    train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
+    train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
     # train_and_evaluate_model(create_deep_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Deep CNN")
-    tune_model(X_tr_rgb[:50_000], y_tr[:50_000], X_val_rgb, y_val)
+    # tune_model(X_tr_rgb[:50_000], y_tr[:50_000], X_val_rgb, y_val)
 
 def train_and_evaluate_model(model_type, X_tr, y_tr, X_val, y_val, model_name):
     model = train_model(model_type, X_tr, y_tr, X_val, y_val)
@@ -44,11 +44,17 @@ def preprocessing_data():
     return X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val
 
 def convert_to_grayscale(images):
-    # Convert to float for better precision
-    images_float = tf.cast(images, tf.float32)
+    batch_size = 64
+    grayscale_image_list = []
 
-    # Apply TensorFlow's rgb_to_grayscale function
-    grayscale_images = tf.image.rgb_to_grayscale(images_float)
+    for i in range(0, images.shape[0], batch_size):
+        batch = images[i: i + batch_size]
+        # Convert to float for better precision
+        images_float = tf.cast(batch, tf.float32)
+        # Apply TensorFlow's rgb_to_grayscale function
+        grayscale_batch = tf.image.rgb_to_grayscale(images_float)
+        grayscale_image_list.append(grayscale_batch)
+    grayscale_images = tf.concat(grayscale_image_list, axis=0)
 
     return grayscale_images
 
