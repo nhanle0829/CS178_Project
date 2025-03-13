@@ -152,6 +152,20 @@ def build_model(hp):
     # Input Layer
     model.add(keras.layers.Input(shape=(32, 32, 3)))
 
+def tune_model(X_tr, y_tr, X_val, y_val):
+    tuner = kt.RandomSearch(
+        build_model,
+        objective="val_accuracy",
+        max_trials=300,
+        executions_per_trial=2,
+        directory="tuning",
+        project_name="CS_178"
+    )
+    tuner.search(X_tr, y_tr, epochs=30, validation_data=(X_val, y_val))
+
+    best_model = tuner.get_best_models(num_models=1)[0]
+    best_model.summary()
+    return best_model
 
 if __name__ == "__main__":
     main()
