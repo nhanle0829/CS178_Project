@@ -168,7 +168,7 @@ def build_model(hp):
         # First Conv2D layer in this block
         model.add(keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, padding="same"))
         # Tune whether to use batch normalization
-        if hp.Boolean(f"batch_norm_conv_{i}", default=True):
+        if hp.Boolean(f"batch_norm_conv1_{i}", default=True):
             model.add(keras.layers.BatchNormalization())
         # Activation function
         model.add(keras.layers.Activation("relu"))
@@ -176,7 +176,7 @@ def build_model(hp):
         # Optional second Conv2D layer
         if hp.Boolean(f"double_conv_{i}", default=False):
             model.add(keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, padding="same"))
-            if hp.Boolean(f"batch_norm_conv_{i}", default=True):
+            if hp.Boolean(f"batch_norm_conv2_{i}", default=True):
                 model.add(keras.layers.BatchNormalization())
             model.add(keras.layers.Activation("relu"))
 
@@ -189,35 +189,35 @@ def build_model(hp):
         )
 
         # Flatten the output
-        model.add(keras.layers.Flatten())
+    model.add(keras.layers.Flatten())
 
-        # Choose number of dense layers (1, 2, or 3)
-        for j in range(hp.Choice("num_dense_layers", values=[1, 2, 3])):
-            # Tune number of dense units
-            dense_units = hp.Int(f"dense_units_{i}", min_value=128, max_value=512, step=64, default=256)
-            model.add(keras.layers.Dense(units=dense_units))
-            # Tune whether to use batch normalization
-            if hp.Boolean(f"batch_norm_dense_{i}", default=True):
-                model.add(keras.layers.BatchNormalization())
-            # Activation function
-            model.add(keras.layers.Activation("relu"))
-            model.add(keras.layers.Dropout(
-                hp.Float(f"dropout_layer_dense_{i}", min_value=0.0, max_value=0.5, step=0.1)
-            ))
+    # Choose number of dense layers (1, 2, or 3)
+    for j in range(hp.Choice("num_dense_layers", values=[1, 2, 3])):
+        # Tune number of dense units
+        dense_units = hp.Int(f"dense_units_{j}", min_value=128, max_value=512, step=64, default=256)
+        model.add(keras.layers.Dense(units=dense_units))
+        # Tune whether to use batch normalization
+        if hp.Boolean(f"batch_norm_dense_{j}", default=True):
+            model.add(keras.layers.BatchNormalization())
+        # Activation function
+        model.add(keras.layers.Activation("relu"))
+        model.add(keras.layers.Dropout(
+            hp.Float(f"dropout_layer_dense_{j}", min_value=0.0, max_value=0.5, step=0.1)
+        ))
 
-        # Output layer
-        model.add(keras.layers.Dense(10, activation="softmax"))
+    # Output layer
+    model.add(keras.layers.Dense(10, activation="softmax"))
 
-        # Tune learning rate for the optimizer
-        learning_rate = hp.Float("learning_rate", min_value=1e-4, max_value=1e-2, sampling="log", default=1e-3)
+    # Tune learning rate for the optimizer
+    learning_rate = hp.Float("learning_rate", min_value=1e-4, max_value=1e-2, sampling="log", default=1e-3)
 
-        # Compile the model
-        model.compile(
-            optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
-            loss="sparse_categorical_crossentropy",
-            metrics=["accuracy"]
-        )
-        return model
+    # Compile the model
+    model.compile(
+        optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
+        loss="sparse_categorical_crossentropy",
+        metrics=["accuracy"]
+    )
+    return model
 
 def tune_model(X_tr, y_tr, X_val, y_val):
     tuner = kt.RandomSearch(
