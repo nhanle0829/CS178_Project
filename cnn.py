@@ -10,8 +10,9 @@ from keras.src.utils import to_categorical
 def main():
     X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val = preprocessing_data()
     # Base CNN
-    train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
-    train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
+    # train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
+    # train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
+    train_and_evaluate_model(create_deep_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Deep CNN")
 
 def train_and_evaluate_model(model_type, X_tr, y_tr, X_val, y_val, model_name):
     model = train_model(model_type, X_tr, y_tr, X_val, y_val)
@@ -80,18 +81,18 @@ def evaluate_model(model, X_val, y_val, model_name):
 def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
     model = keras.models.Sequential([
         # First Convolutional Layer
-        keras.layers.Conv2D(32, 3, activation='relu', input_shape=input_shape),
+        keras.layers.Conv2D(32, 3, activation="relu", input_shape=input_shape, padding="same"),
         keras.layers.MaxPooling2D((2, 2)),
         # Second Convolutional Layer
-        keras.layers.Conv2D(64, 3, activation='relu'),
+        keras.layers.Conv2D(64, 3, activation="relu", padding="same"),
         keras.layers.MaxPooling2D((2, 2)),
 
         keras.layers.Flatten(),
         # Neural Network
-        keras.layers.Dense(128, activation='relu'),
+        keras.layers.Dense(128, activation="relu"),
         # Drop out to reduce overfitting
         keras.layers.Dropout(0.5),
-        keras.layers.Dense(num_classes, activation='softmax')
+        keras.layers.Dense(num_classes, activation="softmax")
     ])
     return model
 
@@ -99,30 +100,30 @@ def create_deep_cnn(input_shape=(32, 32, 3), num_classes=10):
     model = keras.models.Sequential()
 
     # First Convolutional Block
-    model.add(keras.layers.Conv2D(32, 3, input_shape=input_shape))
+    model.add(keras.layers.Conv2D(32, 3, input_shape=input_shape, padding="same"))
     model.add(keras.layers.BatchNormalization())
     model.add(keras.layers.Activation("relu"))
-    model.add(keras.layers.Conv2D(32, 3))
+    model.add(keras.layers.Conv2D(32, 3, padding="same"))
     model.add(keras.layers.BatchNormalization())
     model.add(keras.layers.Activation("relu"))
     model.add(keras.layers.MaxPooling2D((2, 2)))
     model.add(keras.layers.Dropout(0.1))
 
     # Second Convolutional Block
-    model.add(keras.layers.Conv2D(64, 3))
+    model.add(keras.layers.Conv2D(64, 3, padding="same"))
     model.add(keras.layers.BatchNormalization())
     model.add(keras.layers.Activation("relu"))
-    model.add(keras.layers.Conv2D(64, 3))
+    model.add(keras.layers.Conv2D(64, 3, padding="same"))
     model.add(keras.layers.BatchNormalization())
     model.add(keras.layers.Activation("relu"))
     model.add(keras.layers.MaxPooling2D((2, 2)))
     model.add(keras.layers.Dropout(0.2))
 
     # Third Convolutional Block
-    model.add(keras.layers.Conv2D(128, 3))
+    model.add(keras.layers.Conv2D(128, 3, padding="same"))
     model.add(keras.layers.BatchNormalization())
     model.add(keras.layers.Activation("relu"))
-    model.add(keras.layers.Conv2D(128, 3))
+    model.add(keras.layers.Conv2D(128, 3, padding="same"))
     model.add(keras.layers.BatchNormalization())
     model.add(keras.layers.Activation("relu"))
     model.add(keras.layers.MaxPooling2D((2, 2)))
