@@ -53,18 +53,18 @@ def convert_to_grayscale(images):
 
 def train_model(model_factory, X_tr, y_tr, X_val, y_val):
     model = model_factory(input_shape=X_tr[0].shape)
-    model.compile(loss="sparse_categorical_crossentropy", optimizer=Adam(), metrics=['accuracy'])
+    model.compile(loss="sparse_categorical_crossentropy", optimizer=Adam(), metrics=["accuracy"])
 
     # Early Stop condition + Reduce Learning Rate
     callback = [
         EarlyStopping(
-            monitor='val_loss',
+            monitor="val_loss",
             patience=10,
             restore_best_weights=True,
             verbose=1
         ),
         ReduceLROnPlateau(
-            monitor='val_loss',
+            monitor="val_loss",
             factor=0.5,
             patience=5,
             min_lr=1e-6
@@ -151,6 +151,66 @@ def build_model(hp):
     model = keras.models.Sequential()
     # Input Layer
     model.add(keras.layers.Input(shape=(32, 32, 3)))
+
+    # Tune the number of convolutional blocks (1-3)
+    for i in range(hp.Int("conv_blocks", 1, 3, default=2)):
+        # Tune number of filters
+        filters = hp.Int(f"filters_{i}", min_value=32, max_value=256, step=32, default=64)
+        # Tune kernel size
+        kernel_size = hp.Choice(f"kernel_size_{i}", values=[3, 5], default=3)
+        # First Conv2D layer in this block
+        model.add(keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, padding="same"))
+        # Tune whether to use batch normalization
+        if hp.Boolean(f"batch_norm_conv_{i}", default=True):
+            model.add(keras.layers.BatchNormalization())
+        # Activation function
+        model.add(keras.layers.Activation("relu"))
+
+        # Optional second Conv2D layer
+        if hp.Boolean(f"double_conv_{i}", default=False):
+            model.add(keras.layers.Conv2D(filters=filters, kernel_size=kernel_size, padding="same"))
+            if hp.Boolean(f"batch_norm_conv_{i}", default=True):
+                model.add(keras.layers.BatchNormalization())
+            model.add(keras.layers.Activation("relu"))
+
+        # Add pooling
+        model.add(keras.layers.MaxPooling2D(pool_size=(2, 2)))
+
+        # Add dropout
+        model.add(keras.layers.Dropout(
+            hp.Float(f"dropout_conv_{i}", min_value=0.0, max_value=0.5, step=0.1, default=0.2))
+        )
+
+        # Flatten the output
+        model.add(keras.layers.Flatten())
+
+        # Choose number of dense layers (1, 2, or 3)
+        for j in range(hp.Choice("num_dense_layers", values=[1, 2, 3])):
+            # Tune number of dense units
+            dense_units = hp.Int(f"dense_units_{i}", min_value=128, max_value=512, step=64, default=256)
+            model.add(keras.layers.Dense(units=dense_units))
+            # Tune whether to use batch normalization
+            if hp.Boolean(f"batch_norm_dense_{i}", default=True):
+                model.add(keras.layers.BatchNormalization())
+            # Activation function
+            model.add(keras.layers.Activation("relu"))
+            model.add(keras.layers.Dropout(
+                hp.Float(f"dropout_layer_dense_{i}", min_value=0.0, max_value=0.5, step=0.1)
+            ))
+
+        # Output layer
+        model.add(keras.layers.Dense(10, activation="softmax"))
+
+        # Tune learning rate for the optimizer
+        learning_rate = hp.Float("learning_rate", min_value=1e-4, max_value=1e-2, sampling="log", default=1e-3)
+
+        # Compile the model
+        model.compile(
+            optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
+            loss="sparse_categorical_crossentropy",
+            metrics=["accuracy"]
+        )
+        return model
 
 def tune_model(X_tr, y_tr, X_val, y_val):
     tuner = kt.RandomSearch(
