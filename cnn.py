@@ -307,8 +307,8 @@ def rgb_vs_grayscale(his1, his2, his3, his4):
     axis[1][0].set_xlabel("Epoch")
     axis[1][0].set_title("Deep Model with RGB")
 
-    axis[1][1].plot(his3.history["accuracy"], label="Training Accuracy")
-    axis[1][1].plot(his3.history["val_accuracy"], label="Validation Accuracy")
+    axis[1][1].plot(his4.history["accuracy"], label="Training Accuracy")
+    axis[1][1].plot(his4.history["val_accuracy"], label="Validation Accuracy")
     axis[1][1].set_ylabel("Accuracy")
     axis[1][1].set_xlabel("Epoch")
     axis[1][1].set_title("Deep Model with GrayScale")
