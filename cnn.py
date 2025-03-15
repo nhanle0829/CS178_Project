@@ -157,7 +157,7 @@ def create_deep_cnn(input_shape=(32, 32, 3), num_classes=10):
 def build_model(hp):
     model = keras.models.Sequential()
     # Input Layer
-    model.add(keras.layers.Input(shape=(32, 32, 3)))
+    model.add(keras.layers.Input(shape=(32, 32, 1)))
 
     # Tune the number of convolutional blocks (1-3)
     for i in range(hp.Int("conv_blocks", 1, 3, default=2)):
@@ -246,20 +246,33 @@ def tune_model(X_tr, y_tr, X_val, y_val):
 
     best_model = tuner.get_best_models(num_models=1)[0]
     best_model.summary()
+
+    best_trial = tuner.oracle.get_best_trials(num_trials=1)[0]
+    print(best_trial.hyperparameters.values)
+
     return best_model
+
+def evaluate_best_model(model, X_tr, y_tr, X_val, y_val, model_name):
+    callback = [
+        EarlyStopping(
+            monitor="val_loss",
+            patience=10,
+            restore_best_weights=True,
+            verbose=1
+        ),
+        ReduceLROnPlateau(
+            monitor="val_loss",
+            factor=0.5,
+            patience=5,
+            min_lr=1e-6
+        )
+    ]
+
+    model.fit(X_tr, y_tr, validation_data=(X_val, y_val), epochs=50, callbacks=callback)
+
+    test_loss, test_acc = model.evaluate(X_val, y_val)
+    print(f"{model_name} - Test accuracy: {test_acc:.4f}")
+
 
 if __name__ == "__main__":
     main()
-
-
-# keras.models.Sequential([
-#         keras.layers.Conv2D(32, (3, 3), activation='relu', input_shape=input_shape),
-#         keras.layers.MaxPooling2D((2, 2)),
-#         keras.layers.Conv2D(64, (3, 3), activation='relu'),
-#         keras.layers.MaxPooling2D((2, 2)),
-#         keras.layers.Conv2D(128, (3, 3), activation='relu'),
-#         keras.layers.MaxPooling2D((2, 2)),
-#         keras.layers.Flatten(),
-#         keras.layers.Dense(512, activation='relu'),
-#         keras.layers.Dropout(0.5),
-#         keras.layers.Dense(num_classes, activation='softmax')
