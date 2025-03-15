@@ -294,25 +294,30 @@ def rgb_vs_grayscale(his1, his2, his3, his4):
     axis[0][0].set_ylabel("Accuracy")
     axis[0][0].set_xlabel("Epoch")
     axis[0][0].set_title("Base Model with RGB")
+    axis[0][0].legend()
 
     axis[0][1].plot(his2.history["accuracy"], label="Training Accuracy")
     axis[0][1].plot(his2.history["val_accuracy"], label="Validation Accuracy")
     axis[0][1].set_ylabel("Accuracy")
     axis[0][1].set_xlabel("Epoch")
     axis[0][1].set_title("Base Model with GrayScale")
+    axis[0][1].legend()
 
     axis[1][0].plot(his3.history["accuracy"], label="Training Accuracy")
     axis[1][0].plot(his3.history["val_accuracy"], label="Validation Accuracy")
     axis[1][0].set_ylabel("Accuracy")
     axis[1][0].set_xlabel("Epoch")
     axis[1][0].set_title("Deep Model with RGB")
+    axis[1][0].legend()
 
     axis[1][1].plot(his4.history["accuracy"], label="Training Accuracy")
     axis[1][1].plot(his4.history["val_accuracy"], label="Validation Accuracy")
     axis[1][1].set_ylabel("Accuracy")
     axis[1][1].set_xlabel("Epoch")
     axis[1][1].set_title("Deep Model with GrayScale")
+    axis[1][1].legend()
 
+    plt.suptitle("Accuracy and Validation Accuracy for Base and Deep CNN Models on RGB and Grayscale Images")
     plt.tight_layout()
     plt.show()
 
