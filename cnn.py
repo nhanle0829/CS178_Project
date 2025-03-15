@@ -5,19 +5,32 @@ from keras.src.callbacks import EarlyStopping, ReduceLROnPlateau
 from keras.src.optimizers import Adam
 import scipy.io as sio
 import keras_tuner as kt
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import subplots
 
 
 def main():
     X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val = preprocessing_data()
     # Base CNN
-    train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
-    train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
-    # train_and_evaluate_model(create_deep_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Deep CNN")
-    # tune_model(X_tr_rgb[:50_000], y_tr[:50_000], X_val_rgb, y_val)
+    history_base_rgb = train_and_evaluate_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Base CNN RGB")
+    history_base_gray = train_and_evaluate_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Base CNN GrayScale")
+
+    # Deep CNN
+    history_deep_rgb = train_and_evaluate_model(create_deep_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val, "Deep CNN RGB")
+    history_deep_gray = train_and_evaluate_model(create_deep_cnn, X_tr_gray, y_tr, X_val_gray, y_val, "Deep CNN GrayScale")
+
+    # Plot RBG vs Gray Performance
+    rgb_vs_grayscale(history_base_rgb, history_base_gray, history_deep_rgb, history_deep_gray)
+
+    # Tune Model
+    # best_model = tune_model(X_tr_rgb[:50_000], y_tr[:50_000], X_val_rgb, y_val)
+    # evaluate_best_model(best_model, X_tr_gray, y_tr, X_val_gray, y_val, "Best Model")
+
 
 def train_and_evaluate_model(model_type, X_tr, y_tr, X_val, y_val, model_name):
-    model = train_model(model_type, X_tr, y_tr, X_val, y_val)
+    model, history = train_model(model_type, X_tr, y_tr, X_val, y_val)
     evaluate_model(model, X_val, y_val, model_name)
+    return history
 
 def preprocessing_data():
     # Load data
@@ -78,8 +91,8 @@ def train_model(model_factory, X_tr, y_tr, X_val, y_val):
         )
     ]
 
-    model.fit(X_tr, y_tr, validation_data=(X_val, y_val), epochs=50, callbacks=callback)
-    return model
+    history = model.fit(X_tr, y_tr, validation_data=(X_val, y_val), epochs=50, callbacks=callback)
+    return model, history
 
 def evaluate_model(model, X_val, y_val, model_name):
     test_loss, test_acc = model.evaluate(X_val, y_val)
@@ -272,6 +285,36 @@ def evaluate_best_model(model, X_tr, y_tr, X_val, y_val, model_name):
 
     test_loss, test_acc = model.evaluate(X_val, y_val)
     print(f"{model_name} - Test accuracy: {test_acc:.4f}")
+
+def rgb_vs_grayscale(his1, his2, his3, his4):
+    fig, axis = subplots(2, 2)
+
+    axis[0][0].plot(his1.history["accuracy"], label="Training Accuracy")
+    axis[0][0].plot(his1.history["val_accuracy"], label="Validation Accuracy")
+    axis[0][0].set_ylabel("Accuracy")
+    axis[0][0].set_xlabel("Epoch")
+    axis[0][0].set_title("Base Model with RGB")
+
+    axis[0][1].plot(his2.history["accuracy"], label="Training Accuracy")
+    axis[0][1].plot(his2.history["val_accuracy"], label="Validation Accuracy")
+    axis[0][1].set_ylabel("Accuracy")
+    axis[0][1].set_xlabel("Epoch")
+    axis[0][1].set_title("Base Model with GrayScale")
+
+    axis[1][0].plot(his3.history["accuracy"], label="Training Accuracy")
+    axis[1][0].plot(his3.history["val_accuracy"], label="Validation Accuracy")
+    axis[1][0].set_ylabel("Accuracy")
+    axis[1][0].set_xlabel("Epoch")
+    axis[1][0].set_title("Deep Model with RGB")
+
+    axis[1][1].plot(his3.history["accuracy"], label="Training Accuracy")
+    axis[1][1].plot(his3.history["val_accuracy"], label="Validation Accuracy")
+    axis[1][1].set_ylabel("Accuracy")
+    axis[1][1].set_xlabel("Epoch")
+    axis[1][1].set_title("Deep Model with GrayScale")
+
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
