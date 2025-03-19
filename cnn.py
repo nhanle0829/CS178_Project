@@ -98,6 +98,15 @@ def evaluate_model(model, X_val, y_val, model_name):
     test_loss, test_acc = model.evaluate(X_val, y_val)
     print(f"{model_name} - Test accuracy: {test_acc:.4f}")
 
+def create_simple_nn(input_shape=(32, 32, 3), num_classes=10):
+    model = keras.models.Sequential([
+        keras.layers.Flatten(input_shape=input_shape),
+        keras.layers.Dense(128, activation="relu"),
+        keras.layers.Dropout(0.5),
+        keras.layers.Dense(num_classes, activation="softmax")
+    ])
+    return model
+
 def create_base_cnn(input_shape=(32, 32, 3), num_classes=10):
     model = keras.models.Sequential([
         # First Convolutional Layer
@@ -320,6 +329,18 @@ def rgb_vs_grayscale(his1, his2, his3, his4):
     plt.suptitle("Accuracy and Validation Accuracy for Base and Deep CNN Models on RGB and Grayscale Images")
     plt.tight_layout()
     plt.show()
+
+    def compare_nn_and_cnn(X_tr, y_tr, X_val, y_val):
+        nn_train_score = [0] * 10
+        nn_val_score = [0] * 10
+        cnn_train_score = [0] * 10
+        cnn_val_score = [0] * 10
+
+        models = [create_simple_nn, create_base_cnn]
+        for model in models:
+            trial = 0
+            while trial <= 10:
+
 
 
 if __name__ == "__main__":

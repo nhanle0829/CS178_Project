@@ -84,6 +84,7 @@ def plot_pixel_distribution(sample_size=1000):
 
     plt.suptitle("Pixel Distribution")
     plt.tight_layout()
+    plt.savefig("PixelDistribution.png")
     plt.show()
 
 def image_after_normalization():
@@ -99,6 +100,7 @@ def image_after_normalization():
 
     plt.suptitle("An Image Before and After Normalization")
     plt.tight_layout()
+    plt.savefig("BeforeAfter.png")
     plt.show()
 
     print(f"Original image - Min: {original_img.min()}, Max: {original_img.max()}")
