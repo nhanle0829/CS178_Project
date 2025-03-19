@@ -357,8 +357,67 @@ def rgb_vs_grayscale(his1, his2, his3, his4):
         print(np.mean(cnn_train_score))
         print(np.mean(cnn_val_score))
 
+    def compare_base_deep_on_rbg_grayscale(X_tr_rgb, X_val_rgb, X_tr_gray, X_val_gray, y_tr, y_val):
+        base_RGB_train = [0] * 10
+        base_RGB_test = [0] * 10
+        base_gray_train = [0] * 10
+        base_gray_test = [0] * 10
 
+        deep_RGB_train = [0] * 10
+        deep_RGB_test = [0] * 10
+        deep_gray_train = [0] * 10
+        deep_gray_test = [0] * 10
 
+        trial = 1
+        while trial <= 10:
+            models = []
+            while True:
+                model, history = train_model(create_base_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val)
+                if model.evaluate(X_val_rgb, y_val)[1] > 0.80:
+                    break
+            models.append(model)
+            while True:
+                model, history = train_model(create_base_cnn, X_tr_gray, y_tr, X_val_gray, y_val)
+                if model.evaluate(X_tr_gray, y_val)[1] > 0.80:
+                    break
+            models.append(model)
+
+            # Deep CNN
+            while True:
+                model, history = train_model(create_deep_cnn, X_tr_rgb, y_tr, X_val_rgb, y_val)
+                if model.evaluate(X_val_rgb, y_val)[1] > 0.80:
+                    break
+            models.append(model)
+            while True:
+                model, history = train_model(create_deep_cnn, X_tr_gray, y_tr, X_val_gray, y_val)
+                if model.evaluate(X_tr_gray, y_val)[1] > 0.80:
+                    break
+            models.append(model)
+            for idx, model in enumerate(models):
+                if idx in [0, 2]:
+                    test_loss, test_acc = model.evaluate(X_val_rgb, y_val)
+                    train_lost, train_acc = model.evaluate(X_tr_rgb, y_tr)
+                    if idx == 0:
+                        base_RGB_train[trial - 1] = train_acc
+                        base_RGB_test[trial - 1] = test_acc
+                    else:
+                        deep_RGB_train[trial - 1] = train_acc
+                        deep_RGB_test[trial - 1] = test_acc
+                else:
+                    test_loss, test_acc = model.evaluate(X_val_gray, y_val)
+                    train_lost, train_acc = model.evaluate(X_tr_gray, y_tr)
+                    if idx == 1:
+                        base_gray_train[trial - 1] = train_acc
+                        base_gray_test[trial - 1] = test_acc
+                    else:
+                        deep_gray_train[trial - 1] = train_acc
+                        deep_gray_test[trial - 1] = test_acc
+            trial += 1
+
+        model_list = [base_RGB_train, base_RGB_test, base_gray_train, base_gray_test,
+                      deep_RGB_train, deep_RGB_test, deep_gray_train, deep_gray_test]
+        for result in model_list:
+            print(np.mean(result))
 
 
 if __name__ == "__main__":
