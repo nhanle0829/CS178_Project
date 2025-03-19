@@ -338,8 +338,26 @@ def rgb_vs_grayscale(his1, his2, his3, his4):
 
         models = [create_simple_nn, create_base_cnn]
         for model in models:
-            trial = 0
+            trial = 1
             while trial <= 10:
+                model, history = train_model(model, X_tr, y_tr, X_val, y_val)
+                test_loss, test_acc = model.evaluate(X_val, y_val)
+                train_lost, train_acc = model.evaluate(X_tr, y_tr)
+                if train_acc < 0.80:
+                    continue
+                if model == create_simple_nn:
+                    nn_train_score[trial - 1] = train_acc
+                    nn_val_score[trial - 1] = test_acc
+                if model == create_base_cnn:
+                    cnn_train_score[trial - 1] = train_acc
+                    cnn_val_score[trial - 1] = test_acc
+                trial += 1
+        print(np.mean(nn_train_score))
+        print(np.mean(nn_val_score))
+        print(np.mean(cnn_train_score))
+        print(np.mean(cnn_val_score))
+
+
 
 
 
